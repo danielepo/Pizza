@@ -1,5 +1,9 @@
 ﻿using System;
+using System.CodeDom;
+using System.Collections;
+using System.Collections.Generic;
 using NUnit.Framework;
+using System.Linq;
 
 namespace tests
 {
@@ -7,76 +11,57 @@ namespace tests
     public class UnitTest1
     {
         [Test]
-        public void APizzaIsAGrid()
+        public void OneColOneRowReturnsOneCell()
         {
-            var pizza = new Pizza(10, 30);
-            Assert.That(pizza.R, Is.EqualTo(10));
-            Assert.That(pizza.C, Is.EqualTo(30));
-        }
-        [TestCase(-1, 2)]
-        [TestCase(-1, -2)]
-        [TestCase(1, -2)]
-        public void APizzaDoesntHaveNegativePositions(int r, int c)
-        {
-            var pizza = new Pizza(10, 30);
-            Assert.Throws<IndexOutOfRangeException>(() => pizza.GetCell(r, c));
-        }
-        [TestCase(10, 9)]
-        [TestCase(9, 10)]
-        [TestCase(10, 10)]
-        public void APizzaDoesntGoesOutsideOfBouds(int r, int c)
-        {
-            var pizza = new Pizza(10, 10);
-            Assert.Throws<IndexOutOfRangeException>(() => pizza.GetCell(r, c));
-        }
-        [TestCase(9, 8)]
-        [TestCase(5, 5)]
-        [TestCase(0, 0)]
-        public void CanGetAPizzaInASpecificPosition(int r, int c)
-        {
-            var pizza = new Pizza(10, 10);
-            var cell = pizza.GetCell(r, c);
-            Assert.That(cell.R, Is.EqualTo(r));
-            Assert.That(cell.C, Is.EqualTo(c));
+            var slicer = new Slicer(1, 1);
+            var slices = slicer.Slice();
+            Assert.That(slices.Count, Is.EqualTo(1));
+            Assert.IsTrue(slices[0][0]);
         }
         [Test]
-        public void ACellHasRowAndColumn()
+        public void OneColTwoRowsReturnsThreeCells()
         {
-            var cell = new Cell(0, 0);
-            Assert.That(cell.R, Is.EqualTo(0));
-            Assert.That(cell.C, Is.EqualTo(0));
+            var slicer = new Slicer(1, 2);
+            var slices = slicer.Slice();
+            Assert.That(slices.Count, Is.EqualTo(3));
+
+            Assert.IsTrue(slices[0][0]);
+            Assert.IsFalse(slices[0][1]);
+
+            Assert.IsFalse(slices[1][0]);
+            Assert.IsTrue(slices[1][1]);
+
+            Assert.IsTrue(slices[2][0]);
+            Assert.IsTrue(slices[2][1]);
         }
     }
 
-    public class Pizza
+    public class Slicer
     {
-        public int R { get; }
-        public int C { get; }
+        private readonly int _r;
+        private readonly int _c;
 
-        public Pizza(int r, int c)
+        public Slicer(int c, int r)
         {
-            R = r;
-            C = c;
+            _r = r;
+            _c = c;
         }
 
-        public Cell GetCell(int r, int c)
+        public List<bool[]> Slice()
         {
-            if (r < 0 || c < 0 || r >= R || c >= C)
-                throw new IndexOutOfRangeException();
-
-            return new Cell(r,c);
-        }
-    }
-
-    public class Cell
-    {
-        public int R { get; }
-        public int C { get; }
-
-        public Cell(int r, int c)
-        {
-            R = r;
-            C = c;
+            if (_r == 1)
+            {
+                return new List<bool[]>
+                {
+                    new []{true}
+                };
+            }
+            return new List<bool[]>
+            {
+                new List<bool[]> { new []{true,false},
+                new []{false,true}},
+                new List<bool[]> { new []{true,true}},
+            };
         }
     }
 }
